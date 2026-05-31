@@ -44,7 +44,7 @@ activities = {
 
 
 class ChatRequest(BaseModel):
-    message: str = Field(..., min_length=1, max_length=500)
+    message: str = Field(..., max_length=500)
 
 
 def generate_chatbot_response(message: str) -> str:
