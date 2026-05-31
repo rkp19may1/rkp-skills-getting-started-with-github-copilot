@@ -90,6 +90,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const chatMessage = chatbotInput.value.trim();
 
     if (!chatMessage) {
+      chatbotResponseDiv.textContent = "Please enter a question.";
+      chatbotResponseDiv.className = "message error";
+      chatbotResponseDiv.classList.remove("hidden");
       return;
     }
 
