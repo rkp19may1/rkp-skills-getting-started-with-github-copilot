@@ -3,6 +3,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const activitySelect = document.getElementById("activity");
   const signupForm = document.getElementById("signup-form");
   const messageDiv = document.getElementById("message");
+  const chatbotForm = document.getElementById("chatbot-form");
+  const chatbotInput = document.getElementById("chatbot-input");
+  const chatbotResponseDiv = document.getElementById("chatbot-response");
 
   // Function to fetch activities from API
   async function fetchActivities() {
@@ -78,6 +81,44 @@ document.addEventListener("DOMContentLoaded", () => {
       messageDiv.className = "error";
       messageDiv.classList.remove("hidden");
       console.error("Error signing up:", error);
+    }
+  });
+
+  chatbotForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const chatMessage = chatbotInput.value.trim();
+
+    if (!chatMessage) {
+      return;
+    }
+
+    try {
+      const response = await fetch("/chatbot", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message: chatMessage }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        chatbotResponseDiv.textContent = result.response;
+        chatbotResponseDiv.className = "message info";
+        chatbotForm.reset();
+      } else {
+        chatbotResponseDiv.textContent = result.detail || "An error occurred";
+        chatbotResponseDiv.className = "message error";
+      }
+
+      chatbotResponseDiv.classList.remove("hidden");
+    } catch (error) {
+      chatbotResponseDiv.textContent = "Failed to get response. Please try again.";
+      chatbotResponseDiv.className = "message error";
+      chatbotResponseDiv.classList.remove("hidden");
+      console.error("Error communicating with chatbot:", error);
     }
   });
 

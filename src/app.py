@@ -8,6 +8,7 @@ for extracurricular activities at Mergington High School.
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
+from pydantic import BaseModel, Field
 import os
 from pathlib import Path
 
@@ -42,6 +43,25 @@ activities = {
 }
 
 
+class ChatRequest(BaseModel):
+    message: str = Field(..., min_length=1, max_length=500)
+
+
+def generate_chatbot_response(message: str) -> str:
+    normalized_message = message.lower()
+
+    if any(greeting in normalized_message for greeting in ["hello", "hi", "hey"]):
+        return "Hi! I can help with school activities and sign-up questions."
+
+    if "activity" in normalized_message or "activities" in normalized_message:
+        return f"Available activities: {', '.join(activities.keys())}."
+
+    if "signup" in normalized_message or "sign up" in normalized_message or "register" in normalized_message:
+        return "To sign up, choose an activity, enter your email, and click the Sign Up button."
+
+    return "I can help with activities and sign-up questions. Ask me about available activities or how to register."
+
+
 @app.get("/")
 def root():
     return RedirectResponse(url="/static/index.html")
@@ -65,3 +85,12 @@ def signup_for_activity(activity_name: str, email: str):
     # Add student
     activity["participants"].append(email)
     return {"message": f"Signed up {email} for {activity_name}"}
+
+
+@app.post("/chatbot")
+def chatbot(chat_request: ChatRequest):
+    message = chat_request.message.strip()
+    if not message:
+        raise HTTPException(status_code=400, detail="Message cannot be empty")
+
+    return {"response": generate_chatbot_response(message)}
